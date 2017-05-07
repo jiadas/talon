@@ -95,7 +95,7 @@ func main() {
 						}
 
 						// convert to int
-						for _, intKey := range config.Options.Influx.Ints {
+						for _, intKey := range config.Options.Influx.IntList {
 							v, ok := fields[intKey]
 							if ok {
 								vs := fmt.Sprintf("%s", v)
@@ -109,7 +109,7 @@ func main() {
 						}
 
 						// add tags
-						for _, tag := range config.Options.Influx.Tags {
+						for _, tag := range config.Options.Influx.TagList {
 							if tagValue, ok := getTag(fields, tag); ok {
 								tags[tag] = tagValue
 							}

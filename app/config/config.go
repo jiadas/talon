@@ -20,9 +20,9 @@ type Influx struct {
 	Precision   string `json:"precision"`
 	Timeout     int64  `json:"timeout"` // 单位秒
 
-	Tags    []string `json:"tags"` // 需要作为tag的key
-	Ints    []string `json:"ints"` // 需要转换成int类型的key
-	Filters []string // 需要过滤的key
+	TagList    []string `json:"tag_list"`    // 需要作为tag的key
+	IntList    []string `json:"int_list"`    // 需要转换成int类型的key
+	IgnoreList []string `json:"ignore_list"` // 需要过滤的key
 
 	// Batching
 	BatchInterval int64 `json:"batch_interval"` // Defaults to 5s. 单位秒
@@ -54,9 +54,9 @@ func init() {
 		Precision: "ns",
 		Timeout:   1,
 
-		Tags:    []string{"level", "api", "type"},
-		Ints:    []string{"count", "amount", "lantency"},
-		Filters: []string{"body", "input", "output"},
+		TagList:    []string{"level", "api", "type"},
+		IntList:    []string{"count", "amount", "lantency"},
+		IgnoreList: []string{"body", "input", "output"},
 
 		BatchCount: 200,
 	}
