@@ -28,6 +28,7 @@ type Talon struct {
 }
 
 func New() (t *Talon) {
+	// TODO return error
 	// Create a new HTTPClient
 	client, err := newInfluxDBClient(config.Options.Influx)
 	if err != nil {

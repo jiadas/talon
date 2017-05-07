@@ -58,7 +58,8 @@ func init() {
 		IntList:    []string{"count", "amount", "lantency"},
 		IgnoreList: []string{"body", "input", "output"},
 
-		BatchCount: 200,
+		BatchInterval: 5,
+		BatchCount:    200,
 	}
 
 	Options.SLS = s
