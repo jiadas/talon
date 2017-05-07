@@ -30,6 +30,8 @@ type Influx struct {
 }
 
 var Options struct {
+	DataPath string `json:"data_path"`
+
 	SLS *SLS `json:"sls"`
 
 	Influx *Influx `json:"influx"`
@@ -62,6 +64,7 @@ func init() {
 		BatchCount:    200,
 	}
 
+	Options.DataPath = "/var/data/"
 	Options.SLS = s
 	Options.Influx = i
 }

@@ -15,6 +15,9 @@ import (
 type Talon struct {
 	sync.Mutex // TODO: we should clean up all of these locks
 
+	dataPath  string
+	cursorMap map[int]string
+
 	client              influxdb.Client
 	precision, database string
 	tagList             []string
@@ -51,6 +54,9 @@ func New() (t *Talon) {
 	}
 
 	t = &Talon{
+		dataPath:  config.Options.DataPath,
+		cursorMap: make(map[int]string),
+
 		client:        client,
 		precision:     config.Options.Influx.Precision,
 		database:      config.Options.Influx.Database,
@@ -68,6 +74,11 @@ func New() (t *Talon) {
 	return
 }
 
+// TODO add exit
+func (t *Talon) Exit() {
+
+}
+
 func (t *Talon) Capture() (err error) {
 	// 查询指定的logstore有几个shard
 	shardIDs, err := t.logstore.ListShards()
@@ -76,16 +87,10 @@ func (t *Talon) Capture() (err error) {
 	}
 	log.WithField("IDs", shardIDs).Info("list shards")
 
-	// TODO 去掉wg
-	var wg sync.WaitGroup
 	for _, shardID := range shardIDs {
-		wg.Add(1)
 		go func(id int) {
-			defer wg.Done()
-
 			// 指定游标
-			// TODO 暂时只获取距启动前一个小时内的日志
-			cursor, err := t.logstore.GetCursor(id, fmt.Sprintf("%d", time.Now().Add(-1*time.Hour).Unix()))
+			cursor, err := t.logstore.GetCursor(id, t.getCursor(id))
 			if err != nil {
 				log.WithError(err).WithField("shardID", id).Error("faild to get begin cursor")
 				return // TODO 增加重试
@@ -114,8 +119,18 @@ func (t *Talon) Capture() (err error) {
 			}
 		}(shardID)
 	}
-	wg.Wait()
 	return // TODO 从sls消费的速度大于日志产生的速度，但是不应该结束消费
+}
+
+func (t *Talon) getCursor(id int) string {
+	if c, ok := t.cursorMap[id]; ok {
+		return c
+	}
+	// 默认从10分钟前的日志开始消费
+	//return fmt.Sprintf("%d", time.Now().Add(-10*time.Minute).Unix())
+	// TODO 暂时只获取距启动前一个小时内的日志
+	return fmt.Sprintf("%d", time.Now().Add(-1*time.Hour).Unix())
+
 }
 
 func (t *Talon) release(g *sls.LogGroup) {
