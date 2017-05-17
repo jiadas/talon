@@ -167,7 +167,7 @@ func (t *Talon) release(g *sls.LogGroup) {
 		// convert to int
 		for _, intKey := range t.intList {
 			if v, ok := fields[intKey]; ok {
-				vs := fmt.Sprintf("%s", v)
+				vs := fmt.Sprintf("%v", v)
 				result, err := strconv.ParseInt(vs, 10, 64)
 				if err != nil {
 					log.WithError(err).WithFields(log.Fields{"intKey": intKey, "intValue": vs}).Error("failed to ParseInt")
