@@ -1,14 +1,19 @@
 package main
 
 import (
+	"math/rand"
 	"syscall"
+	"time"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/jiadas/talon/app/config"
+	"github.com/jiadas/talon/app/shared/logger"
 	"github.com/jiadas/talon/app/talon"
 	"github.com/judwhite/go-svc/svc"
+	log "github.com/sirupsen/logrus"
 )
 
 type program struct {
+	opts  *config.Options
 	talon *talon.Talon
 }
 
@@ -20,25 +25,31 @@ func main() {
 }
 
 func (p *program) Init(env svc.Environment) error {
-	log.SetFormatter(&log.TextFormatter{
-		ForceColors:   true,
-		FullTimestamp: true,
-	})
+	p.opts = config.NewOptions()
+	p.opts.SetByFlags()
+
+	logger.Init(p.opts)
+
+	rand.Seed(time.Now().UnixNano())
+
 	return nil
 }
 
 func (p *program) Start() error {
-	t := talon.New()
+	t := talon.New(p.opts)
 
 	err := t.LoadMetadata()
 	if err != nil {
 		log.WithError(err).Fatal("failed to load metadata")
 	}
 
-	// TODO handle error
 	t.Capture()
 
 	p.talon = t
+
+	// 加版本信息，每次修改代码的时候修改版本信息，确保最新的修改被正确部署
+	log.WithField("version", "v9").Info("talon started")
+
 	return nil
 }
 
